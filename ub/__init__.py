@@ -35,7 +35,7 @@ else:
     PHONE_NUMBER = str(os.environ.get('PHONE_NUMBER'))
     SESSION_STR = str(os.environ.get('SESSION_STR'))
     SLAVE_BOT_TOKEN = str(os.environ.get('SLAVE_BOT_TOKEN'))
-    LOG_GROUP_ID = int(os.environ.get('LOG_GROUP_ID',None))
+    LOG_GROUP_ID = os.environ.get('LOG_GROUP_ID',None)
     if not LOG_GROUP_ID:
         LOG_GROUP_ID = config['nebulus']['log_grp_id']
     MONGODB_URI = str(os.environ.get('MONGODB_URI'))
