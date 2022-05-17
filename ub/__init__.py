@@ -139,10 +139,14 @@ def sys_info():
 
 async def create_log_grp():
     print('[INFO] No log group ID found, creating a log group')
-    chat = await userbot.create_group('Nebulus Logs',SLAVE_ID)
+    chat = await userbot.create_supergroup("Nebulus Logs","Logs by Nebulus Userbot")
     chatid = chat.id
     await userbot.set_chat_photo(chat_id=chatid,photo=f'{__package__}/res/nebulus.jpg')
-    await userbot.set_chat_description(chatid,'Logs by Nebulus Userbot')
+    try:
+        await userbot.add_chat_members(chatid,SLAVE_ID)
+    except Exception as e:
+        print('[ERROR] Could not add slave bot to group! Add it manually. ERROR given below')
+        print(f'[ERROR] {e}')
     print(f'[INFO] Log group created (Nebulus Logs, chat_id:{chatid})')
     return chatid
 

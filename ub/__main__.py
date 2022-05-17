@@ -165,11 +165,14 @@ async def MainStartup():
         f.close()
         os.remove('restartlog.dat')
     else:
-        await slave_bot.send_message(
-            chat_id=LOG_GROUP_ID,
-            text=deploy,
-            parse_mode='html'
-        )
+        try:
+            await slave_bot.send_message(
+                chat_id=LOG_GROUP_ID,
+                text=deploy,
+                parse_mode='html'
+            )
+        except:
+            print('[SLAVE] Could not send startup status. Am I in the log group?')
 
     print('[ INFO ] All set up. Idling')
     await idle()
