@@ -1,0 +1,9 @@
+__pycache__/
+core/__pycache__/
+slave/__pycache__/
+ub/__pycache__/
+downloads/
+videos/
+*.png
+*.session
+*.session-journal

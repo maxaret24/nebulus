@@ -1,0 +1,15 @@
+aiohttp
+asyncio
+pyrogram==1.4.1
+aiofiles
+deep-translator==1.6.1
+pyyaml
+requests
+pymongo
+dnspython
+psutil
+TGCrypto
+motor
+telegraph
+htmlwebshot
+pytube

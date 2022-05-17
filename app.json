@@ -1,0 +1,40 @@
+{
+    "name": "Nebulus",
+    "description": "A minimalistic yet powerful userbot written in Pyrogram",
+    "repository": "https://github.com/greplix/nebulus",
+    "env": {
+        "API_ID": {
+            "description": "Get it from my.telegram.org",
+            "required": true
+        },
+        "API_HASH": {
+            "description": "Get it from my.telegram.org",
+            "required": true
+        },
+        "PHONE_NUMBER": {
+            "description": "Example: +911234567890",
+            "required": true
+        },
+        "SESSION_STR": {
+            "description": "Generate it using strgen.py",
+            "required": true
+        },
+        "SLAVE_BOT_TOKEN": {
+            "description": "Get it from @BotFather",
+            "required": true
+        },
+        "MONGODB_URI": {
+            "description": "Create a MongoDB database and provide the URI",
+            "required": true
+        },
+        "MAX_USERWARNS": {
+            "description": "Max user warnings for DM-Permit [Default: 5]",
+            "required": false
+        },
+        "CONSOLE_VERBOSE": {
+            "description": "1 if you want verbose logs, 0 if you don't [Default: 0]",
+            "required": false
+        }
+    },
+    "stack": "container"
+}

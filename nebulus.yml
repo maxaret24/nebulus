@@ -1,0 +1,15 @@
+localdeploy: false
+backend:
+  verbose: false
+database:
+  mongo: # MongoDB database URI
+dmpermit:
+  max_userwarns: 5 # Warns for users (DM-Permit)
+nebulus:
+  api_hash: # Get it from my.telegram.org
+  api_id: # Get it from my.telegram.org
+  log_grp_id: null
+  phone_number: # Eg: +911234567890
+  session_str: # Run strgen.py for the session string
+slave:
+  bot_token: # Create a bot in BotFather and get the API token
