@@ -10,8 +10,9 @@ A minimalistic yet powerful userbot written from scratch in pyrogram. It's still
 
 * You'll require the API token provided by Botfather during the setup
 
-* Next up, run `strgen.py` locally (Before that, make sure you have pyrogram==1.4.1 installed).
-Install pyrogram: `pip3 install pyrogram==1.4.1`
+* Next up, you need to generate a session string<br>
+[![Run on Repl.it](https://replit.com/badge/github/greplix/nebulus)](https://replit.com/@greplix/Nebuli-string-session)<br>
+Run this repl to generate
 
 * You'll get a session string in your Saved Messages. Keep it safe.
 
