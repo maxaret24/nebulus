@@ -34,6 +34,10 @@
         "CONSOLE_VERBOSE": {
             "description": "1 if you want verbose logs, 0 if you don't [Default: 0]",
             "required": false
+        },
+        "LOG_GROUP_ID": {
+            "description": "create a new private group and give group ID",
+            "required": "true"
         }
     },
     "stack": "container"
