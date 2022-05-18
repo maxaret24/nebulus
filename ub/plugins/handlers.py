@@ -1,16 +1,15 @@
 from .. import *
 from pyrogram import Client,filters
 from pyrogram.types import Message
-from asyncio import create_subprocess_shell
-from asyncio.subprocess import PIPE
+import subprocess
 
 
-async def runbash(cmd):
-    shell = await create_subprocess_shell(cmd,stdin=PIPE,stderr=PIPE)
-    stdout,stderr = await shell.communicate()
-    if stdout:
-        return stdout
-    return stderr
+def runbash(cmd):
+    res = subprocess.run(cmd.split(' '),capture_output=True)
+    if res.stderr:
+        return res.stderr.decode('utf-8')
+    else:
+        return res.stdout.decode('utf-8')
 # Some gay handlers
 
 @userbot.on_message(
@@ -53,17 +52,17 @@ async def sendHelp(client: Client,message: Message):
     )
 
 @userbot.on_message(
-    filters.command('.update') &
+    filters.command('update',UB_PREFIXES) &
     filters.me &
     ~filters.edited &
     ~filters.via_bot
 )
 async def update_(c, m: Message):
     a = await m.reply_text('**Updating Nebulus...**','md')
-    out = await runbash('git pull -f origin alpha')
+    out = runbash('git pull -f')
     if 'not a git repository' in out:
-        await runbash('git init . && git remote add origin https://github.com/greplix/nebulus.git && git fetch origin alpha && git checkout -f alpha')
-        out = await runbash('git pull -f origin alpha')
+        ok = runbash('git init . && git remote add origin https://github.com/greplix/nebulus.git && git fetch origin alpha && git checkout -f alpha')
+        out = runbash('git pull -f')
     if 'Already up to date' in out:
         await a.edit_text('`Nebulus is already up-to-date`','md')
     else:
