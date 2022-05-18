@@ -156,11 +156,14 @@ async def MainStartup():
         f = open('restartlog.dat','rb')
         data = pickle.load(f)
 
-        await userbot.send_message(
-            chat_id=int(data["chat_id"]),
-            text='**Nebulus restarted successfully**',
-            reply_to_message_id=int(data["message_id"])
-        )
+        try:
+            await userbot.send_message(
+                chat_id=int(data["chat_id"]),
+                text='**Nebulus restarted successfully**',
+                reply_to_message_id=int(data["message_id"])
+            )
+        except:
+            print('[ERROR] Could not send restart status')
 
         f.close()
         os.remove('restartlog.dat')

@@ -87,31 +87,29 @@ async def warn(client: Client,message):
 **Continuing to send further messages will get you blocked.**
 **Please wait for my approval**
 ''','md')
+                await log_warn(user_id,wcount)
             else:
                 await log_warn(user_id,wcount)
-        try:
-            await slave_bot.send_message(
-                chat_id=LOG_GROUP_ID,
-                text=DM_LOG.format(
-                    message.from_user.first_name,
-                    user_id,
-                    message.text.markdown if message.text else "`<Non-Text Message>`"
-                ),
-                reply_markup=InlineKeyboardMarkup(
+        await slave_bot.send_message(
+            chat_id=LOG_GROUP_ID,
+            text=DM_LOG.format(
+                message.from_user.first_name,
+                user_id,
+                message.text.markdown if message.text else "`<Non-Text Message>`"
+            ),
+            reply_markup=InlineKeyboardMarkup(
+                [
                     [
-                        [
-                            InlineKeyboardButton("Approve",f'a:{user_id}'),
-                            InlineKeyboardButton("Block",f'b:{user_id}')
-                        ],
-                        [
-                            InlineKeyboardButton('View user',user_id=user_id)
-                        ]
+                        InlineKeyboardButton("Approve",f'a:{user_id}'),
+                        InlineKeyboardButton("Block",f'b:{user_id}')
+                    ],
+                    [
+                        InlineKeyboardButton('View user',user_id=user_id)
                     ]
-                ),
-                parse_mode='md'
-            )
-        except:
-            print('[SLAVE] Could not log DM message, am I in the log group?')
+                ]
+            ),
+            parse_mode='md'
+        )
 
     else:
         DM_CACHE.append(user_id)
