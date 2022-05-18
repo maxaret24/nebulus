@@ -9,7 +9,6 @@ from telegraph import Telegraph
 from time import time
 from typing import Union
 
-
 with open('nebulus.yml','r') as f:
     config = yaml.safe_load(f)
     f.close()
