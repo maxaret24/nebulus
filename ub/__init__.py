@@ -138,7 +138,7 @@ def update_on_startup():
         repo.heads.alpha.checkout(True)
     og = repo.remote('origin')
     og.fetch(repo.active_branch.name)
-    out = runbash('git pull -f')
+    out = runbash('git pull -f --ff-only')
     if 'Already up to date' in out:
         print('[INFO] Nebulus is up to date')
     else:
