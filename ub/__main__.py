@@ -150,9 +150,10 @@ async def MainStartup():
 
 <i>Slave Bot:</i> @{SLAVE_USERNAME}
 
+<i>Updates:</i> <code>Up to date</code>
 '''
     if UPDATE:
-        deploy += UPDATE
+        deploy = UPDATE
     print('[ INFO ] Senfing startup status')
 
     if os.path.exists('restartlog.dat'):
@@ -162,7 +163,7 @@ async def MainStartup():
         try:
             text = '<b>Restart successful</b>\n'
             if UPDATE:
-                text += UPDATE
+                text = UPDATE
             await userbot.send_message(
                 chat_id=int(data["chat_id"]),
                 text=text,

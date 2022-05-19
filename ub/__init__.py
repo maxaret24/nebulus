@@ -142,10 +142,21 @@ def update_on_startup():
     if 'Already up to date' in out:
         print('[INFO] Nebulus is up to date')
     else:
-        print('[INFO] Update logs')
+        try:
+            commit = list(repo.iter_commits())[0]
+            author, summary = commit.author.name, commit.summary
+        except:
+            author, summary = None, None
+        print(f'[INFO] Author: {author} | Summary: {summary}')
         print(f'====== {out}')
         UPDATE = f'''
+     <code>[ STARTUP ]</code>
+
 <b>Nebulus was updated</b>
+
+<b>Author:</b> <code>{author}</code>
+<b>Summary:</b> <code>{summary}</code>
+
 <code>{out}</code>
 '''
     if LOCAL_DEPLOY:
