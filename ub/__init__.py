@@ -176,6 +176,7 @@ def sys_info():
 **CPUs**: `{cc}`
 **RAM Usage**: `{r}%` 
 **Pyrogram Version**: `{__version__}`
+**Repository**: [GitHub](https://github.com/greplix/nebulus.git)
 '''
     return msg
 
