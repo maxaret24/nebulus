@@ -2,16 +2,21 @@ import os, aiohttp,yaml
 from pyrogram import Client,__version__
 from pyrogram.types import Message,CallbackQuery
 import logging, asyncio
-import json,sys,psutil,pickle
+import json,sys,psutil,pickle,subprocess
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from telegraph import Telegraph
 from time import time
 from typing import Union
+from git import Repo, InvalidGitRepositoryError
+
+UPDATE = None
 
 with open('nebulus.yml','r') as f:
     config = yaml.safe_load(f)
     f.close()
+
+YML_CONFIG = config
 
 STARTUP = time()
 
@@ -54,6 +59,8 @@ with open('settings.json','r') as f:
     val = json.load(f)
     DM_PERMIT = val['dmpermit']
     f.close()
+
+JSON_CONFIG = val
 
 if SESSION_STR:
     userbot = Client(
@@ -102,7 +109,7 @@ print('[INFO] Creating Telegraph account')
 graph = Telegraph()
 graph.create_account(short_name=SLAVE_USERNAME)
 
-
+# -------------------------------------------------------------------
 
 def restart(message: Message):
     chatid = message.chat.id
@@ -111,6 +118,44 @@ def restart(message: Message):
         pickle.dump({"chat_id":chatid,"message_id":msgid},f)
     f.close()
     os.execv(sys.executable,"python3 -m ub".split(" "))
+
+def runbash(cmd):
+    res = subprocess.run(cmd.split(' '),capture_output=True)
+    if res.stderr:
+        return res.stderr.decode('utf-8')
+    else:
+        return res.stdout.decode('utf-8')
+
+def update_on_startup():
+    global UPDATE
+    print('[INFO] Checking for updates...')
+    try:
+        repo = Repo()
+    except InvalidGitRepositoryError:
+        repo = Repo.init()
+        o = repo.create_remote('origin','https://github.com/greplix/nebulus.git')
+        o.fetch()
+        repo.create_head('alpha',o.refs.alpha)
+        repo.heads.alpha.set_tracking_branch(o.refs.alpha)
+        repo.heads.alpha.checkout(True)
+    og = repo.remote('origin')
+    og.fetch(repo.active_branch.name)
+    out = runbash('git pull -f')
+    if 'Already up to date' in out:
+        print('[INFO] Nebulus is up to date')
+    else:
+        print('[INFO] Update logs')
+        print(f'====== {out}')
+        UPDATE = f'''
+<b>Nebulus was updated</b>
+<code>{out}</code>
+'''
+    if LOCAL_DEPLOY:
+        with open('nebulus.yml','w') as f:
+            yaml.dump(YML_CONFIG,f)
+    with open('settings.json','w') as f:
+        json.dump(JSON_CONFIG,f)
+
 
 def get_uptime():
     now = time()
@@ -133,7 +178,7 @@ def sys_info():
 **CPUs**: `{cc}`
 **RAM Usage**: `{r}%` 
 **Pyrogram Version**: `{__version__}`
-    '''
+'''
     return msg
 
 async def create_log_grp():
@@ -156,14 +201,14 @@ async def progress(
     obj: Union[Message,CallbackQuery]
     ):
 
-    t = round((current*100/total),1)
+    t = round((current * 100 / total), 1)
     if t % 50 == 0.0 and total >= 10**7:
-        bar = "█"*int(t/10)
-        space = " "*int(10-(t/10))
-        cmbs = round((current/10**6),2); tmbs = round((total/10**6),2)
+        bar = "=" * int(t / 10)
+        space = " " * int(10 - (t / 10))
+        cmbs = round((current / 10**6), 2); tmbs = round((total / 10**6), 2)
         text = f'''
 **{task}**
-`|{bar}{space}|` **{t}%**
+`[{bar}{space}]` **{t}%**
 
 **{cmbs}/{tmbs} MB**
 '''
@@ -176,9 +221,15 @@ async def progress(
             pass
     else: pass
 
+# -------------------------------------------------------------------
+
+update_on_startup()
+
 if not LOG_GROUP_ID:
     LOG_GROUP_ID = loop.run_until_complete(create_log_grp())
     config['nebulus']['log_grp_id'] = LOG_GROUP_ID
     with open('nebulus.yml','w') as f:
         yaml.dump(config,f)
         f.close()
+
+# -------------------------------------------------------------------

@@ -110,7 +110,7 @@ async def editHelp(client: Client, query: CallbackQuery):
     else:
         keyboard = InlineKeyboardMarkup(markup)
         await query.edit_message_text(
-            text=maintext,parse_mode='markdown',
+            text=maintext,parse_mode='markdown',disable_web_page_preview=True,
             reply_markup=keyboard
         )
 
@@ -149,7 +149,10 @@ async def MainStartup():
 <i>User:</i> {USERBOT_MENTION}
 
 <i>Slave Bot:</i> @{SLAVE_USERNAME}
+
 '''
+    if UPDATE:
+        deploy += UPDATE
     print('[ INFO ] Senfing startup status')
 
     if os.path.exists('restartlog.dat'):
@@ -157,10 +160,14 @@ async def MainStartup():
         data = pickle.load(f)
 
         try:
+            text = '<b>Restart successful</b>\n'
+            if UPDATE:
+                text += UPDATE
             await userbot.send_message(
                 chat_id=int(data["chat_id"]),
-                text='**Nebulus restarted successfully**',
-                reply_to_message_id=int(data["message_id"])
+                text=text,
+                reply_to_message_id=int(data["message_id"]),
+                parse_mode='html'
             )
         except:
             print('[ERROR] Could not send restart status')
@@ -174,8 +181,9 @@ async def MainStartup():
                 text=deploy,
                 parse_mode='html'
             )
-        except:
+        except Exception as e:
             print('[SLAVE] Could not send startup status. Am I in the log group?')
+            print(e)
 
     print('[ INFO ] All set up. Idling')
     await idle()

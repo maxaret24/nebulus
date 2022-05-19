@@ -165,6 +165,8 @@ async def disapprove_user_(client,message):
 
     await message.reply_text(f"**User has been disapproved to PM.**",'md')
     await del_warn(int(userid))
+    if userid in DM_CACHE:
+        DM_CACHE.remove(userid)
 
 
 

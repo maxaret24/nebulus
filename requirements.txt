@@ -13,3 +13,4 @@ motor
 telegraph
 htmlwebshot
 pytube
+GitPython
