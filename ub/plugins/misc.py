@@ -19,6 +19,9 @@ WIKI = '''
 -`.alive`
     __Checks bot status__
 
+-`.restart`
+    __Restarts Nebulus[Also checks for updates]__
+
 -`.ping`
     __Checks bot response time__
 
