@@ -170,6 +170,11 @@ async def MainStartup():
                 reply_to_message_id=int(data["message_id"]),
                 parse_mode='html'
             )
+            await slave_bot.send_message(
+                LOG_GROUP_ID,
+                deploy,
+                parse_mode='html'
+            )
         except:
             print('[ERROR] Could not send restart status')
 
