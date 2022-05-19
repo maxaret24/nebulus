@@ -2,6 +2,7 @@ from .. import *
 from pyrogram import Client,filters
 from pyrogram.types import Message
 import subprocess
+from pyrogram.types import Message
 
 # Some gay handlers
 
@@ -9,7 +10,7 @@ import subprocess
     filters.command('alive',prefixes=UB_PREFIXES) & filters.me
     & ~filters.edited
     )
-async def alive_msg(client,message):
+async def alive_msg(client,message: Message):
     msg='''
 **Nebulus Userbot**
 
@@ -17,7 +18,7 @@ async def alive_msg(client,message):
     '''
     inf = sys_info()
     msg += inf
-    await message.edit_text(msg,'md')
+    await message.edit_text(msg,'md',disable_web_page_preview=True)
 
 
 @userbot.on_message(
