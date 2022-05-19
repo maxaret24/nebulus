@@ -135,7 +135,7 @@ async def approve_user_(client,message: Message):
     res = await approve_user(int(userid))
     if not res:
         return await message.reply_text("`User is already approved`",'md')
-    await message.reply_text(f"**User has been approved to PM.**",'md')
+    await message.reply_text(f"**User has been approved to DM.**",'md')
     await del_warn(int(userid))
 
 
@@ -163,7 +163,7 @@ async def disapprove_user_(client,message):
     if not res:
         return await message.reply_text("`User has not been approved yet`",'md')
 
-    await message.reply_text(f"**User has been disapproved to PM.**",'md')
+    await message.reply_text(f"**User has been disapproved to DM.**",'md')
     await del_warn(int(userid))
     if userid in DM_CACHE:
         DM_CACHE.remove(userid)
