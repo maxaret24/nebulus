@@ -44,7 +44,9 @@ async def respond(client: Client, query: InlineQuery):
     if query.from_user.id != USERBOT_ID:
         await query.answer(
             [
-                InlineQueryResultArticle("go away",InputTextMessageContent("go away"))
+                InlineQueryResultArticle(
+                    "Not for you",
+                    InputTextMessageContent("Not for you"))
             ],is_personal=True
         )
     else:
@@ -55,8 +57,10 @@ async def respond(client: Client, query: InlineQuery):
             text="**No results found**"
             return await query.answer(
                 [
-                    InlineQueryResultArticle(udquery,InputTextMessageContent(
-                        message_text=text,parse_mode='markdown',disable_web_page_preview=True
+                    InlineQueryResultArticle(
+                        udquery,
+                        InputTextMessageContent(
+                        message_text=text,disable_web_page_preview=True
                     ))
                 ],is_personal=True
             )
@@ -66,12 +70,12 @@ async def respond(client: Client, query: InlineQuery):
                     'definition':d['definition'],
                     'example':d['example']
                 }
-            text=string.format(udquery,results[0]['definition'],results[0]['example'])
-            kb=rt_keyboard(0)
+            text = string.format(udquery,results[0]['definition'],results[0]['example'])
+            kb = rt_keyboard(0)
         await query.answer(
             [
                 InlineQueryResultArticle(udquery,InputTextMessageContent(
-                    message_text=text,parse_mode='markdown',disable_web_page_preview=True
+                    message_text=text,disable_web_page_preview=True
                 ),reply_markup=kb)
             ],is_personal=True
         )
@@ -89,31 +93,32 @@ async def menustuffs(client,query: CallbackQuery):
     d = query.data.split(':')[1]
 
     if d =='close':
-        await query.edit_message_text(
-            "Closed"
+        await slave_bot.edit_inline_text(
+            query.inline_message_id,
+            "**Closed**"
         )
         return
 
     index = d.split('=')[1]
 
     if 'n' in d:
-        nindex = int(index)+1
+        nindex = int(index) + 1
     else:
-        nindex = int(index)-1
+        nindex = int(index) - 1
 
     kb = rt_keyboard(nindex)
     try:
-        msg = string.format(udquery,results[nindex]['definition'],results[nindex]['example'])
+        msg = string.format(udquery, results[nindex]['definition'], results[nindex]['example'])
     except KeyError:
-            if nindex<int(index):
-                key = list(results.keys())[-1]
-            elif nindex>int(index):
-                key = list(results.keys())[0]
-            msg = string.format(udquery,results[key]['definition'],results[key]['example'])
-            kb=rt_keyboard(key)
-    await query.edit_message_text(
+        if nindex < int(index):
+            key = list(results.keys())[-1]
+        elif nindex > int(index):
+            key = list(results.keys())[0]
+        msg = string.format(udquery, results[key]['definition'], results[key]['example'])
+        kb = rt_keyboard(key)
+    await slave_bot.edit_inline_text(
+        query.inline_message_id,
         msg,
-        parse_mode='markdown',
         reply_markup=kb
     )
 

@@ -8,7 +8,6 @@ from pyrogram.types import Message
 
 @userbot.on_message(
     filters.command('alive',prefixes=UB_PREFIXES) & filters.me
-    & ~filters.edited
     )
 async def alive_msg(client,message: Message):
     msg='''
@@ -18,7 +17,7 @@ async def alive_msg(client,message: Message):
     '''
     inf = sys_info()
     msg += inf
-    await message.edit_text(msg,'md',disable_web_page_preview=True)
+    await message.edit_text(msg,disable_web_page_preview=True)
 
 
 @userbot.on_message(
@@ -26,7 +25,7 @@ async def alive_msg(client,message: Message):
     filters.me
 )
 async def rest(client,message):
-    m = await message.edit_text('Restarting slave bot and userbot, please wait...')
+    m = await message.edit_text('`Restarting slave bot and userbot, please wait...`')
     restart(message=m)
 
 @userbot.on_message(

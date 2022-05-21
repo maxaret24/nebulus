@@ -1,6 +1,6 @@
 aiohttp
 asyncio
-pyrogram==1.4.1
+pyrogram==2.0.24
 aiofiles
 deep-translator==1.6.1
 pyyaml

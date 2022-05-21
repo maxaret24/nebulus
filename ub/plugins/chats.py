@@ -1,8 +1,10 @@
 import pyrogram
+from pyrogram.enums import ParseMode,ChatType
 from pyrogram import Client, filters
 from .. import UB_PREFIXES,userbot,USERBOT_ID
 from ..core.decorators import *
 from time import time
+from pyrogram.enums import ChatType
 
 NAME = "Chats"
 
@@ -57,7 +59,7 @@ def lookup(u: pyrogram.types.User):
     return text
 
 def lookupchat(chat: pyrogram.types.Chat):
-    if chat.type != 'supergroup' and chat.type != 'group':
+    if chat.type not in [ChatType.SUPERGROUP,ChatType.GROUP]:
         return "**Usage**\n`.whois (Reply to a message or supply username|userID or empty for chat info)`"
     text=f'''
 **Chat Info**
@@ -75,31 +77,31 @@ def lookupchat(chat: pyrogram.types.Chat):
 
 @userbot.on_message(
     filters.command(["purge","spurge"],prefixes=UB_PREFIXES) &
-    ~filters.edited &
     filters.me
 )
+@log_errors
 @admin('can_delete_messages')
 async def purgemsgs(client: Client,message: pyrogram.types.Message):
     # function name says its purpose
     await message.delete()
     rep = message.reply_to_message
     if not rep:
-        return await message.edit_text('`Reply to a message to purge from`','md')
+        return await message.edit_text('`Reply to a message to purge from`')
     cmd = message.command
     if len(cmd) > 1 and cmd[1].isdigit():
-        purgeto = rep.message_id + int(cmd[1])
-        if purgeto > message.message_id:
-            purgeto = message.message_id
+        purgeto = rep.id + int(cmd[1])
+        if purgeto > message.id:
+            purgeto = message.id
     else:
-        purgeto = message.message_id
-    messages = list(range(rep.message_id,purgeto))
+        purgeto = message.id
+    messages = list(range(rep.id,purgeto))
     s = time()
     while len(messages) != 0:
         chunk = []
         for m in messages[:100]:
             chunk.append(m)
             messages.remove(m)
-        await client.delete_messages(
+        count = await client.delete_messages(
             chat_id=message.chat.id,
             message_ids=chunk,
             revoke=True
@@ -107,32 +109,31 @@ async def purgemsgs(client: Client,message: pyrogram.types.Message):
     e = time()
     delta = round(e-s,2)
     if message.text[1] != 's':
-        await message.reply_text(f"`Purge completed in {delta}s`",'md')
+        await message.reply_text(f"`Purged {count} messages in {delta}s`")
 
 
 
 @userbot.on_message(
     filters.command(["pin","lpin"],prefixes=UB_PREFIXES) &
-    ~filters.edited &
     filters.me
 )
+@log_errors
 @admin('can_pin_messages')
 async def pinmsg(c: Client, m: Message):
     if m.reply_to_message:
         await c.pin_chat_message(
             chat_id = m.chat.id,
-            message_id = m.reply_to_message.message_id,
+            message_id = m.reply_to_message.id,
             disable_notification = False if m.text[1] == 'l' else True,
-            both_sides = True if m.chat.type == 'private' else False
+            both_sides = True if m.chat.type == ChatType.PRIVATE else False
         )
-        await m.edit_text(f'[Message]({m.reply_to_message.link}) `has been pinned`','md')
+        await m.edit_text(f'[Message]({m.reply_to_message.link}) `has been pinned`',ParseMode.MARKDOWN)
     else:
-        await m.edit_text("`Reply to a message to pin it`",'md')
+        await m.edit_text("`Reply to a message to pin it`")
 
 
 @userbot.on_message(
     filters.command('id',prefixes=UB_PREFIXES) &
-    ~filters.edited &
     filters.me
 )
 async def get_id(client: Client, message: Message):
@@ -141,30 +142,29 @@ async def get_id(client: Client, message: Message):
 **Your ID** : `{message.from_user.id}`
 **Chat ID** : `{message.chat.id}`
 **Replied User ID** : `{message.reply_to_message.from_user.id or message.reply_to_message.sender_chat.id}`
-**Message ID** : `{message.message_id}`
-**Replied message ID** : `{message.reply_to_message.message_id}`
+**Message ID** : `{message.id}`
+**Replied message ID** : `{message.reply_to_message.id}`
         '''
     else:
         text=f'''
 **Your ID** : `{message.from_user.id}`
 **Chat ID** : `{message.chat.id}`
-**Message ID** : `{message.message_id}`
+**Message ID** : `{message.id}`
         '''
-    await message.edit_text(text,'md')
+    await message.edit_text(text)
 
 
 @userbot.on_message(
     filters.command('block',prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.edited &
     ~filters.via_bot
 )
 async def block_(c,m: Message):
     if not m.reply_to_message:
-        return await m.edit_text('`Reply to a user to block`','md')
+        return await m.edit_text('`Reply to a user to block`')
     if m.reply_to_message.from_user.id == USERBOT_ID:
-        return await m.edit_text('`You\'re trying to block yourself`','md')
-    await m.reply_text('**User has been blocked!**','md')
+        return await m.edit_text('`You\'re trying to block yourself`')
+    await m.reply_text('**User has been blocked!**')
     await c.block_user(m.reply_to_message.from_user.id)
 
 
@@ -172,21 +172,19 @@ async def block_(c,m: Message):
 @userbot.on_message(
     filters.command('unblock',prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.edited &
     ~filters.via_bot
 )
 async def unblock_(c,m: Message):
     if not m.reply_to_message:
-        return await m.edit_text('`Reply to a user to unblock`','md')
+        return await m.edit_text('`Reply to a user to unblock`')
     if m.reply_to_message.from_user.id == USERBOT_ID:
-        return await m.edit_text('`You\'re trying to unblock yourself`','md')
-    await m.reply_text('**User has been unblocked**','md')
+        return await m.edit_text('`You\'re trying to unblock yourself`')
+    await m.reply_text('**User has been unblocked**')
     await c.unblock_user(m.reply_to_message.from_user.id)
 
 
 @userbot.on_message(
     filters.command('leave',prefixes=UB_PREFIXES) &
-    ~filters.edited &
     filters.me &
     ~filters.private
 )
@@ -196,25 +194,24 @@ async def l_(c,m: Message):
 
 @userbot.on_message(filters.command("info",prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.edited &
     ~filters.via_bot
 )
 @log_errors
-async def lukup(client: Client,message):
+async def lukup(client: Client,message: Message):
     if message.reply_to_message:
         user = message.reply_to_message.from_user
         msg = lookup(user)
-        await message.edit_text(msg,'md')
+        await message.edit_text(msg)
     else:
         if len(message.command) > 1:
             identifier = message.command[1]
             try:
                 user = await client.get_users([identifier])
                 msg = lookup(user[0])
-                await message.edit_text(msg,'md')
+                await message.edit_text(msg)
             except Exception as e:
                 ex = f'**Exception :** `{e}`'
-                await message.edit_text(ex,'md')
+                await message.edit_text(ex)
         else:
             text = lookupchat(message.chat)
-            await message.edit_text(text,'md')
+            await message.edit_text(text)

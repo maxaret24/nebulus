@@ -1,6 +1,9 @@
+from contextlib import suppress
 from pyrogram import filters,types,Client
 from .. import LOG_GROUP_ID, USERBOT_ID,slave_bot,USERBOT_MENTION
 import json
+from pyrogram.enums import ParseMode
+from pyrogram.errors.exceptions.bad_request_400 import PeerIdInvalid
 
 with open('settings.json','r') as f:
     config = json.load(f)
@@ -39,8 +42,7 @@ You can turn it off/on by using the command
 
 @slave_bot.on_message(
     filters.command('start') &
-    filters.private &
-    ~filters.edited
+    filters.private
 )
 async def s_(c,m: types.Message):
     if m.from_user.id != USERBOT_ID:
@@ -50,12 +52,12 @@ async def s_(c,m: types.Message):
                 m.from_user.first_name,
                 USERBOT_MENTION
             ),
-            parse_mode='html',
+            parse_mode=ParseMode.HTML,
             reply_markup=types.InlineKeyboardMarkup([
                 [types.InlineKeyboardButton(text='Nebulus',url='https://t.me/NebulusUB')]
             ])
         )
-    await m.reply_text(mmsg.format(MSG_FORWARD),'html',
+    await m.reply_text(mmsg.format(MSG_FORWARD),parse_mode=ParseMode.HTML,
     reply_markup=types.InlineKeyboardMarkup([
                 [types.InlineKeyboardButton(text='Nebulus',url='https://t.me/NebulusUB')]
             ])) # not with ya :)
@@ -63,28 +65,28 @@ async def s_(c,m: types.Message):
 @slave_bot.on_message(
     filters.command('msg') &
     ~filters.user(users=[USERBOT_ID]) &
-    filters.private &
-    ~filters.edited
+    filters.private
 )
 async def forwardmsg(c: Client,m: types.Message):
     if not MSG_FORWARD: return
     if len(m.command) > 1:
         message = m.text.markdown.strip('/msg')
-        await c.send_message(
-            LOG_GROUP_ID,
+        with suppress(PeerIdInvalid):
+            await c.send_message(
+                LOG_GROUP_ID,
 f'''
 **Message from** {m.from_user.first_name}
 **Contents:**
 
 {message[:4000]}
-''',parse_mode='md',
-    reply_markup=types.InlineKeyboardMarkup(
-        [
+''',
+        reply_markup=types.InlineKeyboardMarkup(
             [
-                types.InlineKeyboardButton("View user",user_id=m.from_user.id)
+                [
+                    types.InlineKeyboardButton("View user",user_id=m.from_user.id)
+                ]
             ]
-        ]
-    )
+            )
         )
         await m.reply_text('I have forwarded your message to my master.')
     else:
@@ -93,8 +95,7 @@ f'''
 @slave_bot.on_message(
     filters.command('forward') &
     filters.user(users=[USERBOT_ID]) &
-    filters.private &
-    ~filters.edited
+    filters.private
 )
 async def setforward(c,m: types.Message):
     global MSG_FORWARD,config
@@ -107,8 +108,8 @@ async def setforward(c,m: types.Message):
             text = '**Message forwarding enabled**'
         else:
             text = '**Usage:**\n`/forward off/on`'
-            return await m.reply_text(text,'md')
-        await m.reply_text(text,'md')
+            return await m.reply_text(text)
+        await m.reply_text(text)
         config['msgforward'] = MSG_FORWARD
         with open('settings.json','w') as f:
             json.dump(config,f)

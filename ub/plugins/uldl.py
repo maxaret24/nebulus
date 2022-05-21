@@ -19,20 +19,22 @@ Manage Files
 
 -`.read`
     __Read a file and upload content to telegram__
+
+-`.rm`
+    __Delete a file existing locally__
 '''
 
 @userbot.on_message(
     filters.command(['dl','download'],prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.via_bot &
-    ~filters.edited
+    ~filters.via_bot
 )
 async def dldoc(client: Client, message: Message):
     if not message.reply_to_message:
-        return await message.reply_text('`Reply to a message with document/media to download`','md')
+        return await message.reply_text('`Reply to a message with document/media to download`')
     try:
         name = message.command[1] if len(message.command) > 1 else None
-        m = await message.edit_text('`Downloading...`','md')
+        m = await message.edit_text('`Downloading...`')
         if name:
             path = await message.reply_to_message.download(
                 name,
@@ -45,25 +47,24 @@ async def dldoc(client: Client, message: Message):
                 progress_args=('Downloading...',m)
             )
         if not path:
-            return await m.edit_text('`Download unsuccessful`','md')
-        await m.edit_text(f'`Download successful`\n**Path:** `{path}`','md')
+            return await m.edit_text('`Download unsuccessful`')
+        await m.edit_text(f'`Download successful`\n**Path:** `{path}`')
     except:
-        await m.edit_text('`Something went wrong`','md')
+        await m.edit_text('`Something went wrong`')
 
 
 @userbot.on_message(
     filters.command(['ul','upload'],prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.via_bot &
-    ~filters.edited
+    ~filters.via_bot
 )
 async def ul_(c: Client, message: Message):
     if len(message.command) < 2:
-        return await message.reply_text('`Please provide a file path`','md')
+        return await message.reply_text('`Please provide a file path`')
     path = (' '.join(message.command[1:])).strip()
     if not os.path.exists(path):
-        return await message.reply_text('`The path provided doesn\'t exist`','md')
-    a = await message.edit_text('`Uploading...`','md')
+        return await message.reply_text('`The path provided doesn\'t exist`')
+    a = await message.edit_text('`Uploading...`')
     await c.send_document(
         message.chat.id,
         path,
@@ -76,13 +77,12 @@ async def ul_(c: Client, message: Message):
 @userbot.on_message(
     filters.command(['read'],prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.via_bot &
-    ~filters.edited
+    ~filters.via_bot
 )
 async def read_(c: Client,m: Message):
     if not m.reply_to_message or not m.reply_to_message.document:
-        return await m.edit_text('`Reply to a document to read its contents`','md')
-    a = await m.reply_text('`Downloading...`','md')
+        return await m.edit_text('`Reply to a document to read its contents`')
+    a = await m.reply_text('`Downloading...`')
     path = await m.reply_to_message.download()
     try:
         async with aiofiles.open(path,'r') as f:
@@ -94,7 +94,25 @@ async def read_(c: Client,m: Message):
             url = page['url']
             await a.edit_text(f'File Contents: {url}',disable_web_page_preview=True)
         else:
-            await a.edit_text(f'`{content}`','md')
+            await a.edit_text(f'`{content}`')
     except:
-        await a.edit_text(f'`Something went wrong`','md')
+        await a.edit_text(f'`Something went wrong`')
     os.remove(path)
+
+
+@userbot.on_message(
+    filters.command(['rm'],prefixes=UB_PREFIXES) &
+    filters.me &
+    ~filters.via_bot
+)
+async def rm_(c, m: Message):
+    if len(m.command) != 2:
+        return await m.reply_text('`Provide a file path to delete it`')
+    path = m.command[1]
+    if os.path.isfile(path):
+        os.remove(path)
+        text = f'**Deleted:** `{path}`'
+    else:
+        text = f'**Error:** `Bad file path`'
+    await m.reply_text(text)
+

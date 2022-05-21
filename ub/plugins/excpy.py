@@ -34,7 +34,6 @@ tasks = {}
 @userbot.on_message(
     filters.command(['exec','py'],prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.edited &
     ~filters.via_bot
 )
 async def pyexc(client: Client, message: Message):
@@ -44,7 +43,7 @@ async def pyexc(client: Client, message: Message):
         if statement.endswith('\n'):
             statement = statement[:-1]
     except IndexError:
-        await message.edit_text('`Provide a Python statement to execute`','md')
+        await message.edit_text('`Provide a Python statement to execute`')
         return
 
     async def execute(command: str):
@@ -60,7 +59,7 @@ async def pyexc(client: Client, message: Message):
     stdout = sys.stdout
     stderr = sys.stderr
     iostdout = StringIO(); iostderr = StringIO()
-    m = await message.reply_text('`Executing...`','md')
+    m = await message.reply_text('`Executing...`')
     returnval,stdo,stde = None, None, None
     sys.stdout = iostdout; sys.stderr = iostderr
     try:
@@ -81,7 +80,7 @@ async def pyexc(client: Client, message: Message):
     else: output = f'`Executed`'
     if returnval: output = f'\n**Exception:** `{returnval}`'
     await asyncio.sleep(0.5)
-    await m.edit_text(output,'md')
+    await m.edit_text(output)
     del tasks[tid]
 
 
@@ -89,8 +88,7 @@ async def pyexc(client: Client, message: Message):
 @userbot.on_message(
     filters.command('tasks',prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.via_bot &
-    ~filters.edited
+    ~filters.via_bot
 )
 async def list_tasks(client: Client, message: Message):
     output = ''
@@ -100,14 +98,13 @@ async def list_tasks(client: Client, message: Message):
         output += '**SNO**    **Task ID**\n'
         for x,y in enumerate(tasks.keys()):
             output += f'`{x+1}`        `{y}`'
-    await message.edit_text(output,'md')
+    await message.edit_text(output)
 
 
 
 @userbot.on_message(
     filters.command('kill',prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.edited &
     ~filters.via_bot
 )
 async def kill_task(client: Client, message: Message):
@@ -127,4 +124,4 @@ async def kill_task(client: Client, message: Message):
     except Exception as e:
         msg = f'**Exception:** `{e}`'
 
-    await message.edit_text(msg,'md')
+    await message.edit_text(msg)

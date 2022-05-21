@@ -1,7 +1,9 @@
+from contextlib import suppress
 import json
 from pyrogram import Client,filters
 from pyrogram.types import \
     Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.errors.exceptions.bad_request_400 import PeerIdInvalid
 from .. import (
     DM_PERMIT,
     LOG_GROUP_ID, 
@@ -54,7 +56,6 @@ Avoid spams in DM
     ~filters.me &
     ~filters.bot &
     ~filters.service &
-    ~filters.edited &
     ~filters.via_bot
 )
 async def warn(client: Client,message):
@@ -74,7 +75,7 @@ async def warn(client: Client,message):
             wcount = int(warning['WARNCOUNT'])
             wcount += 1
             if wcount > MAX_USERWARNS:
-                await message.reply_text("**Automatically blocked for spam.**",'md')
+                await message.reply_text("**Automatically blocked for spam.**")
                 await client.block_user(user_id)
                 await del_warn(user_id)
                 return
@@ -86,30 +87,30 @@ async def warn(client: Client,message):
 
 **Continuing to send further messages will get you blocked.**
 **Please wait for my approval**
-''','md')
+''')
                 await log_warn(user_id,wcount)
             else:
                 await log_warn(user_id,wcount)
-        await slave_bot.send_message(
-            chat_id=LOG_GROUP_ID,
-            text=DM_LOG.format(
+        with suppress(PeerIdInvalid):
+            await slave_bot.send_message(
+                chat_id=LOG_GROUP_ID,
+                text=DM_LOG.format(
                 message.from_user.first_name,
                 user_id,
                 message.text.markdown if message.text else "`<Non-Text Message>`"
-            ),
-            reply_markup=InlineKeyboardMarkup(
-                [
+                ),
+                reply_markup=InlineKeyboardMarkup(
                     [
-                        InlineKeyboardButton("Approve",f'a:{user_id}'),
-                        InlineKeyboardButton("Block",f'b:{user_id}')
-                    ],
-                    [
-                        InlineKeyboardButton('View user',user_id=user_id)
+                        [
+                            InlineKeyboardButton("Approve",f'a:{user_id}'),
+                            InlineKeyboardButton("Block",f'b:{user_id}')
+                        ],
+                        [
+                            InlineKeyboardButton('View user',user_id=user_id)
+                        ]
                     ]
-                ]
-            ),
-            parse_mode='md'
-        )
+                )
+            )
 
     else:
         DM_CACHE.append(user_id)
@@ -121,7 +122,6 @@ async def warn(client: Client,message):
     filters.command(["a","approve"],UB_PREFIXES) &
     filters.me &
     filters.private &
-    ~filters.edited &
     ~filters.via_bot
     )
 async def approve_user_(client,message: Message):
@@ -134,8 +134,8 @@ async def approve_user_(client,message: Message):
         return await message.reply_text('Please provide a user ID or reply to a user\'s message')
     res = await approve_user(int(userid))
     if not res:
-        return await message.reply_text("`User is already approved`",'md')
-    await message.reply_text(f"**User has been approved to DM.**",'md')
+        return await message.reply_text("`User is already approved`")
+    await message.reply_text(f"**User has been approved to DM.**")
     await del_warn(int(userid))
 
 
@@ -144,7 +144,6 @@ async def approve_user_(client,message: Message):
     filters.command(["da","disapprove"],prefixes=UB_PREFIXES) &
     filters.me &
     filters.private &
-    ~filters.edited &
     ~filters.via_bot
     )
 async def disapprove_user_(client,message):
@@ -161,9 +160,9 @@ async def disapprove_user_(client,message):
     res = await disapprove_user(int(userid))
 
     if not res:
-        return await message.reply_text("`User has not been approved yet`",'md')
+        return await message.reply_text("`User has not been approved yet`")
 
-    await message.reply_text(f"**User has been disapproved to DM.**",'md')
+    await message.reply_text(f"**User has been disapproved to DM.**")
     await del_warn(int(userid))
     if userid in DM_CACHE:
         DM_CACHE.remove(userid)
@@ -173,7 +172,6 @@ async def disapprove_user_(client,message):
 @userbot.on_message(
     filters.command('dmp',prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.edited &
     ~filters.via_bot
     )
 async def set_dmp(client,message):
@@ -181,14 +179,14 @@ async def set_dmp(client,message):
     if len(message.command) > 1:
         mode = message.command[1]
         if mode.lower() in ['disable','false','off']:
-            json.dump({"dmpermit":False},f)
-            m = await message.reply_text("**DM-Permit has been disabled. Restarting...**",'md')
+            json.dump({"dmpermit": False}, f)
+            m = await message.reply_text("**DM-Permit has been disabled. Restarting...**")
             f.close()
             restart(message=m)
         elif mode.lower() in ['enable','true','on']:
-            json.dump({"dmpermit":True},f)
-            m = await message.reply_text("**DM-Permit has been enabled. Restarting...**",'md')
+            json.dump({"dmpermit": True}, f)
+            m = await message.reply_text("**DM-Permit has been enabled. Restarting...**")
             f.close()
             restart(message=m)
     else:
-        await message.reply_text("**Usage**\n`.dmp off|on`",'md')
+        await message.reply_text("**Usage**\n`.dmp off|on`")

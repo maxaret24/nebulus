@@ -43,11 +43,11 @@ WIKI = '''
 )
 async def pong(client,message):
     s = datetime.now()
-    m = await message.edit_text('**🏓 Pong!**','md')
+    m = await message.edit_text('**🏓 Pong!**')
     e = datetime.now()
     tm = round((e-s).microseconds/1000,1)
     await asyncio.sleep(0.8)
-    await m.edit_text(f"**Pong : {tm} ms**",'md')
+    await m.edit_text(f"**Pong : {tm} ms**")
 
 
 
@@ -61,33 +61,33 @@ async def trans(client,message):
         text = message.reply_to_message.text.strip()
         if len(message.text.split(" ")) == 2:
             lang = message.text.split(" ")[1]
-        else:lang = "english"
+        else:
+            lang = "english"
         try:
             translated = GoogleTranslator(source="auto",target=lang).translate(text)
-            await message.reply_text(f"**Translated to {lang}** : \n`{translated}`",'md')
+            await message.reply_text(f"**Translated to {lang}** : \n`{translated}`")
         except Exception as e:
-            await message.reply_text(f"**Exception during translation :** `{e}`",'md')
+            await message.reply_text(f"**Exception during translation :** `{e}`")
     else:
-        await message.edit_text("`Reply to a message to translate`",'md')
+        await message.edit_text("`Reply to a message to translate`")
 
 
 
 @userbot.on_message(
     filters.command('reserve',UB_PREFIXES) &
-    filters.me & ~filters.edited
+    filters.me
 )
 async def reserve(c: Client,m):
     if len(m.command) != 2:
-        return await m.edit_text('`Provide a username to reserve it`','md')
+        return await m.edit_text('`Provide a username to reserve it`')
     username = m.command[1].replace('@','').strip()
     try:
         chat = await userbot.create_channel('Reserved')
-        await userbot.update_chat_username(chat_id=chat.id,username=username)
-        await m.reply_text(f'**Reserved** @{username} **successfully**','md')
+        await userbot.set_chat_username(chat_id=chat.id,username=username)
+        await m.reply_text(f'**Reserved** @{username} **successfully**')
     except:
-        await m.reply_text(f'**Couldn\'t reserve username**','md')
-        try:await userbot.delete_channel(chat.id)
-        except:pass
+        await m.reply_text(f'**Couldn\'t reserve username**')
+        await userbot.delete_channel(chat.id)
   
 
 @userbot.on_message(
@@ -98,7 +98,7 @@ async def define(client: Client,message):
     splitted = message.command
     cid = message.chat.id
     if len(splitted) != 2 or splitted[1] == "":
-        await message.reply_text("`A query is required to search UrbanDictionary.`",'md')
+        await message.reply_text("`A query is required to search UrbanDictionary.`")
     else:
         query = 'ud ' + splitted[1]
         results = await client.get_inline_bot_results(SLAVE_USERNAME,query)

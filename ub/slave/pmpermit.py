@@ -41,12 +41,14 @@ async def send_msg(client: Client, query: InlineQuery):
             InlineQueryResultArticle(
                 "pmtext",
                 InputTextMessageContent(
-                    message_text=pmtext,
-                    parse_mode='markdown'
+                    message_text=pmtext
                 ),reply_markup=InlineKeyboardMarkup([
                     [
                         InlineKeyboardButton("Approve",f"a:{userid}"),
                         InlineKeyboardButton('Block',f'b:{userid}')
+                    ],
+                    [
+                        InlineKeyboardButton("Nebulus",url='https://t.me/NebulusUB')
                     ]
                 ])
             )
@@ -58,22 +60,35 @@ async def send_msg(client: Client, query: InlineQuery):
 )
 async def approveu(client: Client, query: CallbackQuery):
     if query.from_user.id != USERBOT_ID:
-        await query.answer('Sorry, this button is not for you',
-        cache_time=300)
+        await query.answer(
+        'Sorry, this button is not for you',
+        cache_time=300
+        )
         return
     userid = int(query.data.split(':')[1])
     res = await approve_user(userid)
-    if res:await query.edit_message_text('**User has been approved to DM**','md')
-    else:await query.edit_message_text('**User is already approved**','md')
+    if res:
+        await slave_bot.edit_inline_text(
+            query.inline_message_id,
+            "**User has been approved to DM**"
+        )
+    else:
+        await slave_bot.edit_inline_text(
+            query.inline_message_id,
+            "**User is already approved to DM**"
+        )
 
 @slave_bot.on_callback_query(
     filters.regex('^b:.+')
 )
-async def bluck(client: Client, query: CallbackQuery):
+async def block_(client: Client, query: CallbackQuery):
     if query.from_user.id != USERBOT_ID:
         await query.answer('Sorry, this button is not for you',
         cache_time=300)
         return
     userid = int(query.data.split(':')[1])
-    await query.edit_message_text('**User has been blocked**','md')
+    await slave_bot.edit_inline_text(
+        query.inline_message_id,
+        '**User has been blocked**'
+    )
     await userbot.block_user(userid)

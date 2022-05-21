@@ -9,6 +9,7 @@ from pyrogram.types import (
     CallbackQuery,
     InputTextMessageContent,
 )
+from pyrogram.enums import ParseMode
 from time import sleep
 from . import *
 
@@ -39,10 +40,10 @@ for i in modules:
     print(f'[USERBOT] Loaded module: {i}.py from plugins')
     sleep(0.1)
 
-
 print(f'[USERBOT] {len(modules)} modules loaded successfully.')
+
 keys = list(mwiki.keys())
-markup = [] # Create main menu
+markup = [] # Help Menu buttons
 while len(keys) != 0:
     lel = []
     for x in keys[:3]:
@@ -51,9 +52,11 @@ while len(keys) != 0:
         )
         keys.remove(x)
     markup.append(lel)
-markup.append([
+markup.append(
+    [
     InlineKeyboardButton(text="Close",callback_data="help:close")
-])
+    ]
+)
 
 for x in os.listdir(f'{__package__}/slave'):
     if x.endswith('.py'):
@@ -76,11 +79,17 @@ async def respond(client: Client, query: InlineQuery):
     keyboard = InlineKeyboardMarkup(markup)
     await query.answer(
         [
-            InlineQueryResultArticle("help",InputTextMessageContent(
-                message_text=maintext,parse_mode='markdown',disable_web_page_preview=True
-            ),reply_markup=keyboard
+            InlineQueryResultArticle(
+                "help",
+                InputTextMessageContent(
+                    message_text=maintext,
+                    parse_mode=ParseMode.MARKDOWN,
+                    disable_web_page_preview=True
+            ),
+            reply_markup=keyboard
             )
-        ],is_personal=True
+        ],
+        is_personal=True
     )
 
 
@@ -93,28 +102,34 @@ async def editHelp(client: Client, query: CallbackQuery):
         return
     d = query.data.split(":")[1]
     if d == "close":
-        await query.edit_message_text(
-            "**Help menu closed**",parse_mode='markdown'
+        await slave_bot.edit_inline_text(
+            query.inline_message_id,
+            "**Help Menu Closed**",
+            ParseMode.MARKDOWN
         )
         return
     if d != "back":
         wiki = mwiki[d]
-        await query.edit_message_text(
-            text=wiki,
-            reply_markup=InlineKeyboardMarkup([
+        await slave_bot.edit_inline_text(
+            inline_message_id = query.inline_message_id,
+            text = wiki,
+            reply_markup = 
+            InlineKeyboardMarkup([
                 [InlineKeyboardButton(text="Back",callback_data='help:back'),
                 InlineKeyboardButton(text="Close",callback_data='help:close')]
             ]),
-            parse_mode='markdown'
+            parse_mode=ParseMode.MARKDOWN
         )
     else:
         keyboard = InlineKeyboardMarkup(markup)
-        await query.edit_message_text(
-            text=maintext,parse_mode='markdown',disable_web_page_preview=True,
+        await slave_bot.edit_inline_text(
+            inline_message_id=query.inline_message_id,
+            text=maintext,parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True,
             reply_markup=keyboard
         )
 
-  
+
 @slave_bot.on_inline_query(
     filters.regex('^hm:.+')
 )
@@ -131,7 +146,7 @@ async def irespond(client, inline: InlineQuery):
     await inline.answer([
         InlineQueryResultArticle(
             'Help',
-            InputTextMessageContent(w,parse_mode='md')
+            InputTextMessageContent(w,parse_mode=ParseMode.MARKDOWN)
         )
     ],
     is_personal=True
@@ -146,11 +161,10 @@ async def MainStartup():
 
 <code>Userbot is up and running</code>
 
-<i>User:</i> {USERBOT_MENTION}
+<b>User:</b> {USERBOT_MENTION}
+<b>Slave Bot:</b> @{SLAVE_USERNAME}
 
-<i>Slave Bot:</i> @{SLAVE_USERNAME}
-
-<i>Updates:</i> <code>Up to date</code>
+<b>Updates:</b> <code>Up to date</code>
 '''
     if UPDATE:
         deploy = UPDATE
@@ -168,12 +182,12 @@ async def MainStartup():
                 chat_id=int(data["chat_id"]),
                 text=text,
                 reply_to_message_id=int(data["message_id"]),
-                parse_mode='html'
+                parse_mode=ParseMode.HTML
             )
             await slave_bot.send_message(
                 LOG_GROUP_ID,
                 deploy,
-                parse_mode='html'
+                parse_mode=ParseMode.HTML
             )
         except:
             print('[ERROR] Could not send restart status')
@@ -185,7 +199,7 @@ async def MainStartup():
             await slave_bot.send_message(
                 chat_id=LOG_GROUP_ID,
                 text=deploy,
-                parse_mode='html'
+                parse_mode=ParseMode.HTML
             )
         except Exception as e:
             print('[SLAVE] Could not send startup status. Am I in the log group?')

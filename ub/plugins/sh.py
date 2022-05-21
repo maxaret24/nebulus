@@ -28,7 +28,6 @@ WIKI = '''
     filters.command(["sh"],
     prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.edited &
     ~filters.via_bot
 )
 async def execute_shell_command(client,message):
@@ -39,7 +38,7 @@ async def execute_shell_command(client,message):
     '''
     splitted = message.text.split(" ")
     if len(splitted) == 1 or splitted[1] == "":
-        await message.reply_text("**Usage**\n`.sh|.bash some_bash_command`",'md')
+        await message.reply_text("**Usage**\n`.sh|.bash some_bash_command`")
     else:
         command = ' '.join(splitted[1:])
         try:
@@ -50,7 +49,7 @@ async def execute_shell_command(client,message):
             )
             pid = process.pid
             processes[pid] = process
-            m = await message.reply_text(f'**Executing...** `[Process ID: {pid}]`','md')
+            m = await message.reply_text(f'**Executing...** `[Process ID: {pid}]`')
             await asyncio.sleep(0.5)
             stdout, stderr = await process.communicate()
             if stdout:
@@ -69,44 +68,43 @@ async def execute_shell_command(client,message):
                 del processes[pid]
             except: pass
         except Exception as e:
-            await m.edit_text(f"**Exception :** `{e}`",'md')
+            await m.edit_text(f"**Exception :** `{e}`")
 
 
 @userbot.on_message(
     filters.command(["plist"],
     prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.edited &
     ~filters.via_bot
 )
 async def plist_(c, m: Message):
     if processes == {}:
-        return await m.reply_text('`There are no running processes`','md')
+        return await m.reply_text('`There are no running processes`')
     text = '''
 **Process IDs**
 
 '''
     for x in processes.keys():
         text += f'`{x}`\n'
-    await m.reply_text(text,'md')
+    await m.reply_text(text)
 
 #TODO: Add SIGTERM
 @userbot.on_message(
     filters.command(['pkill']) &
     filters.me &
-    ~filters.edited &
     ~filters.via_bot
 )
 async def sigkill(c, m: Message):
     if len(m.command) != 2:
-        return await m.reply_text('`Provide a Process ID to kill it`','md')
+        return await m.reply_text('`Provide a Process ID to kill it`')
     try:
         process = processes[int(m.command[1])]
         process.kill()
         del processes[int(m.command[1])]
+        await m.reply_text(f'**Process ID:** `{m.command[1]}`\n**Status:** `Killed`')
     except KeyError:
-        await m.reply_text('`Provide a valid Process ID`','md')
+        await m.reply_text('`Provide a valid Process ID`')
     except ValueError:
-        await m.reply_text('`Provide a valid Process ID`','md')
+        await m.reply_text('`Provide a valid Process ID`')
     except Exception as e:
-        await m.reply_text(f'**Exception:** `{e}`','md')
+        await m.reply_text(f'**Exception:** `{e}`')

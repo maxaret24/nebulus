@@ -1,5 +1,6 @@
+from contextlib import suppress
 import os, aiohttp,yaml
-from pyrogram import Client,__version__
+from pyrogram import Client,__version__,enums
 from pyrogram.types import Message,CallbackQuery
 import logging, asyncio
 import json,sys,psutil,pickle,subprocess
@@ -39,7 +40,7 @@ else:
     PHONE_NUMBER = str(os.environ.get('PHONE_NUMBER'))
     SESSION_STR = str(os.environ.get('SESSION_STR'))
     SLAVE_BOT_TOKEN = str(os.environ.get('SLAVE_BOT_TOKEN'))
-    LOG_GROUP_ID = int(os.environ.get('LOG_GROUP_ID',None))
+    LOG_GROUP_ID = int(os.environ.get('LOG_GROUP_ID',0))
     MONGODB_URI = str(os.environ.get('MONGODB_URI'))
     MAX_USERWARNS = int(os.environ.get('MAX_USERWARNS',5))
 
@@ -62,10 +63,8 @@ JSON_CONFIG = val
 
 if SESSION_STR:
     userbot = Client(
-    SESSION_STR,
-    api_id=API_ID,
-    api_hash=API_HASH,
-    phone_number=PHONE_NUMBER
+    "Nebulus",
+    session_string=SESSION_STR
 )
 else:
     userbot = Client(
@@ -94,10 +93,10 @@ sme = slave_bot.get_me()
 
 USERBOT_ID = me.id
 USERBOT_USERNAME = me.username
-USERBOT_MENTION = me.mention
+USERBOT_MENTION = me.mention(style='md')
 SLAVE_ID = sme.id
 SLAVE_USERNAME = sme.username
-SLAVE_MENTION = sme.mention
+SLAVE_MENTION = sme.mention(style='md')
 
 print('[INFO] Initialising MongoDB Client...')
 mongo = AsyncIOMotorClient(MONGODB_URI)
@@ -111,11 +110,11 @@ graph.create_account(short_name=SLAVE_USERNAME)
 
 def restart(message: Message):
     chatid = message.chat.id
-    msgid = message.message_id
+    msgid = message.id
     with open('restartlog.dat','wb') as f:
         pickle.dump({"chat_id":chatid,"message_id":msgid},f)
     f.close()
-    os.execv(sys.executable,"python3 -m ub".split(" "))
+    os.execvp(sys.executable, [sys.executable, "-m", "ub"])
 
 def runbash(cmd):
     res = subprocess.run(cmd.split(' '),capture_output=True)
@@ -224,9 +223,9 @@ async def progress(
 '''
         try:
             if isinstance(obj,Message):
-                await obj.edit_text(text,'md')
+                await obj.edit_text(text,enums.ParseMode.MARKDOWN)
             elif isinstance(obj,CallbackQuery):
-                await obj.edit_message_text(text,'md')
+                await obj.edit_message_text(text,enums.ParseMode.MARKDOWN)
         except:
             pass
     else: pass
@@ -235,7 +234,7 @@ async def progress(
 
 update_on_startup()
 
-if not LOG_GROUP_ID:
+if LOG_GROUP_ID == 0:
     LOG_GROUP_ID = loop.run_until_complete(create_log_grp())
     config['nebulus']['log_grp_id'] = LOG_GROUP_ID
     with open('nebulus.yml','w') as f:

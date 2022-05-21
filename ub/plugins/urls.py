@@ -74,12 +74,11 @@ new_lst = check_suffixes(lst)
 @log_errors
 async def get_panel(client,message: Message):
     if len(message.command) == 1:
-        return await message.edit_text('`Provide a URL`','md')
+        return await message.edit_text('`Provide a URL`')
     global stext,total
     url = message.text.split(" ")[1].strip()
-    mid = message.message_id
     meh = await message.reply_text(
-    "**Scanning for possible admin panels...**",'md'
+    "**Scanning for possible admin panels...**"
     )
     try:
         print(f'LOADED URLS: {total}')
@@ -91,7 +90,7 @@ async def get_panel(client,message: Message):
         print(nresult)
         failed = total - len(nresult)
         if failed == total:
-            await meh.edit_text(MSG.format(url,total,failed,'None'),'md')
+            await meh.edit_text(MSG.format(url,total,failed,'None'))
         else:
             stext = ''
             for _ in nresult:
@@ -101,9 +100,9 @@ async def get_panel(client,message: Message):
                 fi = io.BytesIO(fmsg.encode('utf-8'))
                 fi.name = 'results.txt'
                 await message.reply_document(fi)
-            else: await meh.edit_text(fmsg,'md')
+            else: await meh.edit_text(fmsg)
     except Exception as e:
-        await meh.edit_text(f'**Exception**\n`{e}`','md')
+        await meh.edit_text(f'**Exception**\n`{e}`')
 
 # unshorten url
 
@@ -113,13 +112,12 @@ async def get_panel(client,message: Message):
 )
 async def ushort(client,message):
     if len(message.command) == 1:
-        return await message.edit_text('`Provide a URL`','md')
+        return await message.edit_text('`Provide a URL`')
     url = message.text.split(" ")[1].strip()
     data = await client_session.get(url)
-    u = data.url
     ru = data.real_url
     await message.edit_text(
-    f"**URL** : `{url}`\n**Unshortened URL** : `{ru}`",'md'
+    f"**URL** : `{url}`\n**Unshortened URL** : `{ru}`"
     )
 
 # SQLi query based injection vuln
@@ -127,15 +125,14 @@ async def ushort(client,message):
 @userbot.on_message(
     filters.command("sqli",prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.via_bot &
-    ~filters.edited
+    ~filters.via_bot
 )
 @log_errors
 async def detect_sqli(client,message):
     if len(message.command) == 1:
-        return await message.edit_text('`Provide a URL`','md')
+        return await message.edit_text('`Provide a URL`')
     try:
-        await message.edit_text("**Finding possible SQLi vulnerabilities...**",'md')
+        await message.edit_text("**Finding possible SQLi vulnerabilities...**")
         url = message.text.split(" ")[1].strip()
         if urlparse(url).query:
             q = urlparse(url).query
@@ -160,21 +157,20 @@ async def detect_sqli(client,message):
 **DB** : `{dbname}`
 **SQL Error** : `{error}`
 **X-Powered-By** : `{xxx}`
-''','md'        )
+''')
             else:
-                await message.reply_text('**Didn\'t get any SQLi vulnerabilities**','md')
+                await message.reply_text('**Didn\'t get any SQLi vulnerabilities**')
         else:
-            await message.reply_text('**URL doesn\'t have queries to inject payloads**','md')
+            await message.reply_text('**URL doesn\'t have queries to inject payloads**')
     except IndexError:
-        await message.edit_text('**Usage**\n`.sqli URL`','md')
+        await message.edit_text('**Usage**\n`.sqli URL`')
 
 
 
 @userbot.on_message(
     filters.command("webss",prefixes=UB_PREFIXES) &
     filters.me &
-    ~filters.via_bot &
-    ~filters.edited
+    ~filters.via_bot
 )
 async def ss_(c: Client, m: Message):
     if not m.reply_to_message and len(m.command) == 1:
@@ -188,7 +184,7 @@ async def ss_(c: Client, m: Message):
     try:
         ss = WebShot(quality=88, flags=["--enable-javascript", "--no-stop-slow-scripts"])
         img = await ss.create_pic_async(url=url)
-        await m.reply_photo(photo=img,caption=f'`{url}`',parse_mode='md')
+        await m.reply_photo(photo=img,caption=f'`{url}`')
         await a.delete()
     except Exception as e:
-        await a.edit_text(f'**Exception**: `{e}`','md')
+        await a.edit_text(f'**Exception**: `{e}`')

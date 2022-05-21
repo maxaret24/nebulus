@@ -1,6 +1,8 @@
 from typing import Any, Tuple
 from pyrogram import types,filters
 import os,secrets,logging
+
+from ub.core.decorators import log_errors
 from .. import (
     slave_bot,
     USERBOT_ID,
@@ -40,7 +42,7 @@ def get_streams(link,type) -> Tuple[int,Any,Any]:
     return sid,p
 
 async def dvid(chatid,sid,itag,callback: types.CallbackQuery):
-    await callback.edit_message_text(text=f'**Downloading...**',parse_mode='markdown')
+    await callback.edit_message_text(text=f'**Downloading...**')
     stream = streamdict[sid]
     vid = stream.get_by_itag(itag)
     n = secrets.token_hex(16)
@@ -62,16 +64,16 @@ async def dvid(chatid,sid,itag,callback: types.CallbackQuery):
             )
         else:
             os.rename(f'videos/{filename}',f'videos/{n}.mp3')
-            await callback.edit_message_text(text=f'**Uploading...**',parse_mode='markdown')
+            await callback.edit_message_text(text=f'**Uploading...**')
             await userbot.send_audio(
                 chat_id=chatid,
                 audio=f'videos/{n}.mp3',
                 caption=f'**Title:** {vid.title}',
                 file_name=vid.title
             )
-        await callback.edit_message_text('**Uploaded successfully**','md')
+        await callback.edit_message_text('**Uploaded successfully**')
     except Exception as e:
-        await callback.edit_message_text(f'**Exception**\n`{e}`','md')
+        await callback.edit_message_text(f'**Exception**\n`{e}`')
     rmfile(f'videos/{n}.mp3')
     rmfile(f'videos/{filename}')
     logging.info('VIDEO LOCALLY REMOVED')
@@ -81,6 +83,7 @@ async def dvid(chatid,sid,itag,callback: types.CallbackQuery):
 @slave_bot.on_inline_query(
     filters.regex('^yt[a-z]?\|.+\|.+')
 )
+@log_errors
 async def ytv(c,query: types.InlineQuery):
     if query.from_user.id != USERBOT_ID:
         return
@@ -95,7 +98,7 @@ async def ytv(c,query: types.InlineQuery):
         await query.answer(
             [
                 types.InlineQueryResultArticle("error",
-                types.InputTextMessageContent(f'**Exception:** `{e}`','md'))
+                types.InputTextMessageContent(f'**Exception:** `{e}`'))
             ],is_personal=True
         )
         return
@@ -107,8 +110,7 @@ async def ytv(c,query: types.InlineQuery):
                 types.InputTextMessageContent(
                     f'**Title:** {ytobj.title}\n**Author:** {ytobj.author}' \
                     if typ == 'video' else \
-                        f'**Title:** {ytobj.title}\n\n**Choose a download filesize-**',
-                        parse_mode='md'
+                        f'**Title:** {ytobj.title}\n\n**Choose a download filesize-**'
                 ),reply_markup=keyboard
             )
         ],is_personal=True
@@ -126,4 +128,4 @@ async def dlvideo_(c,query: types.CallbackQuery):
     try:
         await dvid(chatid,sid,itag,query)
     except Exception as e:
-        await query.edit_message_text(f'**Exception:** `{e}`','md')
+        await query.edit_message_text(f'**Exception:** `{e}`')
