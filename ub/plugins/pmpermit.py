@@ -65,12 +65,12 @@ async def warn(client: Client,message):
         warning = await get_warn(user_id)
         if not warning:
             result = await client.get_inline_bot_results(SLAVE_USERNAME,f"pmp:{user_id}")
-            await log_warn(user_id,1)
             await client.send_inline_bot_result(
                 chat_id=message.chat.id,
                 query_id=result.query_id,
                 result_id=result.results[0].id
             )
+            await log_warn(user_id,1)
         else:
             wcount = int(warning['WARNCOUNT'])
             wcount += 1
