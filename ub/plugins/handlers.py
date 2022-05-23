@@ -3,7 +3,7 @@ from pyrogram import Client,filters
 from pyrogram.types import Message
 import subprocess
 from pyrogram.types import Message
-
+import re
 # Some gay handlers
 
 @userbot.on_message(
@@ -43,3 +43,13 @@ async def sendHelp(client: Client,message: Message):
             query_id=results.query_id,
             result_id=results.results[0].id
     )
+
+# https://github.com/alemidev/alemibot/blob/594c2f99e41fe2ea2198b194aa7447327b0fb16a/util/text.py#L31
+@userbot.on_message(
+    filters.command('neofetch') &
+    filters.me
+)
+async def neofetch_(c,m):
+    output = runbash('neofetch')
+    stripped = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])').sub('',output)
+    await m.reply_text(f'`{stripped}`')
