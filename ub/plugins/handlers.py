@@ -46,7 +46,7 @@ async def sendHelp(client: Client,message: Message):
 
 # https://github.com/alemidev/alemibot/blob/594c2f99e41fe2ea2198b194aa7447327b0fb16a/util/text.py#L31
 @userbot.on_message(
-    filters.command('neofetch') &
+    filters.command('neofetch',UB_PREFIXES) &
     filters.me
 )
 async def neofetch_(c,m):
