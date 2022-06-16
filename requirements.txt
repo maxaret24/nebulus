@@ -12,5 +12,5 @@ TGCrypto
 motor
 telegraph
 htmlwebshot
-pytube
+git+https://github.com/greplix/pytube.git
 GitPython

@@ -14,32 +14,38 @@ from pytube import YouTube
 
 streamdict = {}
 
+
 def rmfile(filename):
     if os.path.exists(filename):
         os.remove(filename)
 
+
 def genkeyboard(sid,streams,typ,chatid):
-    kb=[]
+    kb = []
     streams = list(streams)
     while len(streams) != 0:
-        lel=[]
+        lel = []
         for x in streams[:3]:
-            lel.append(types.InlineKeyboardButton(
-                text=f'{round(x.filesize/10**6,2)}MB' if typ=='audio' else f'{x.resolution}'
-                ,callback_data=f'{sid}|{x.itag}|{chatid}'))
+            lel.append(
+                types.InlineKeyboardButton(
+                    text = f'{round(x.filesize / 10**6, 2)}MB' if typ=='audio' else f'{x.resolution}',
+                    callback_data = f'{sid}|{x.itag}|{chatid}')
+                )
             streams.remove(x)
         kb.append(lel)
     return types.InlineKeyboardMarkup(kb)
 
+
 def get_streams(link,type) -> Tuple[int,Any,Any]:
     p = YouTube(link)
     if type == 'video':
-        streams = p.streams.filter(type='video',progressive=True)
+        streams = p.streams.filter(type = 'video', progressive = True)
     else:
-        streams = p.streams.filter(type='audio',mime_type='audio/webm')
+        streams = p.streams.filter(type = 'audio',mime_type = 'audio/webm')
     sid = 0 if len(list(streamdict.keys())) == 0 else list(streamdict.keys())[-1] + 1
     streamdict[sid] = streams
     return sid,p
+
 
 async def dvid(chatid,sid,itag,callback: types.CallbackQuery):
     await callback.edit_message_text(text=f'**Downloading...**')
@@ -54,13 +60,13 @@ async def dvid(chatid,sid,itag,callback: types.CallbackQuery):
     try:
         if vid.type == 'video':
             await userbot.send_video(
-            chat_id=chatid,
-            video=f'videos/{filename}',
-            caption=f'**Title:** {vid.title}\n**Resolution:** {vid.resolution}',
-            supports_streaming=True,
-            progress=progress,
-            progress_args=('Uploading...',callback),
-            file_name=vid.title
+                chat_id=chatid,
+                video=f'videos/{filename}',
+                caption=f'**Title:** {vid.title}\n**Resolution:** {vid.resolution}',
+                supports_streaming=True,
+                progress=progress,
+                progress_args=('Uploading...',callback),
+                file_name=vid.title
             )
         else:
             os.rename(f'videos/{filename}',f'videos/{n}.mp3')
