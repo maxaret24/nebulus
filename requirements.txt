@@ -14,3 +14,5 @@ telegraph
 htmlwebshot
 git+https://github.com/greplix/pytube.git
 GitPython
+bs4
+html-parser

@@ -2,6 +2,7 @@ from .. import (
     userbot,
     UB_PREFIXES,
     SLAVE_USERNAME,
+    client_session
     )
 from pyrogram import Client,filters
 from pyrogram.types import Message
@@ -9,7 +10,9 @@ from datetime import datetime
 import asyncio
 from deep_translator import GoogleTranslator
 from ..core.decorators import log_errors
-
+from urllib.parse import quote_plus
+from bs4 import BeautifulSoup
+from random import choice
 
 NAME = "Tools"
 
@@ -33,6 +36,9 @@ WIKI = '''
 
 -`.ud WORD`
     __Get the meaning of a word from UrbanDictionary__
+
+-`.gsearch QUERY`
+    __Search Google__
 '''
 
 
@@ -107,6 +113,36 @@ async def define(client: Client,message):
             results.query_id,
             results.results[0].id
         )
+
+
+@userbot.on_message(
+    filters.command('gsearch',UB_PREFIXES) &
+    filters.me
+)
+async def gsearch(c,m: Message):
+    if len(m.command) < 2:
+        return await m.reply_text('`Provide a query to search Google`')
+    a = await m.edit_text('`Searching...`')
+    query = ' '.join(m.command[1:])
+    query = quote_plus(query)
+    resp = await client_session.get('https://fake-useragent.herokuapp.com/browsers/0.1.11')
+    json = await resp.json()
+    header = {'User-Agent':choice(json['browsers']['chrome'])}
+    rsp = await client_session.get('https://www.google.com/search?q=%s' % query,headers=header)
+    soup = BeautifulSoup(rsp.content,'html.parser')
+    results = []
+    for x in soup.find_all('div',{'class':'egMi0 kCrYT'}):
+        href = x.a['href'].split('&')[4][4:]
+        head = x.div.text
+        results.append((head,href))
+    if results == []:
+        return await a.edit_text('`No results. Either due to bad query string or CAPTCHA.`')
+    text='''
+**Google Results**
+'''
+    for r in results:
+        text+=f'\n`{r[0]}`\n{r[1]}'
+    await a.edit_text(text,disable_web_page_preview=True)
 
 '''
 async def get_sticker(client: Client,chat,messages: list):
