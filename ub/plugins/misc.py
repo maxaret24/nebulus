@@ -142,7 +142,7 @@ async def gsearch(c,m: Message):
 **Google Results**
 '''
     for r in results:
-        text+=f'\n`{r[0]}`\n{r[1]}'
+        text+=f'\n\n`{r[0]}`\n{r[1]}'
     await a.edit_text(text,disable_web_page_preview=True)
 
 '''
