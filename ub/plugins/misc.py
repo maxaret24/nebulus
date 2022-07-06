@@ -129,7 +129,7 @@ async def gsearch(c,m: Message):
     json = await resp.json()
     header = {'User-Agent':choice(json['browsers']['chrome'])}
     rsp = await client_session.get('https://www.google.com/search?q=%s' % query,headers=header)
-    soup = BeautifulSoup(rsp.content,'html.parser')
+    soup = BeautifulSoup(rsp,'html.parser')
     results = []
     for x in soup.find_all('div',{'class':'egMi0 kCrYT'}):
         href = x.a['href'].split('&')[4][4:]
